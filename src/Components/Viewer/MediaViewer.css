@@ -33,7 +33,6 @@
 }
 
 .media-viewer-wrapper {
-    cursor: pointer;
     flex-grow: 1;
     flex-shrink: 1;
     display: flex;
@@ -58,6 +57,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    z-index: -1;
 }
 
 .media-viewer-right-column {
@@ -73,9 +73,28 @@
     color: white;
     display: flex;
     flex-direction: row;
+    z-index: 1;
 }
 
 .media-viewer-footer-commands {
     display: flex;
     flex-direction: row;
+}
+
+.media-viewer-left-column .media-viewer-button-extended::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25%;
+    height: 100%;
+}
+
+.media-viewer-right-column .media-viewer-button-extended::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 75%;
+    height: 100%;
 }

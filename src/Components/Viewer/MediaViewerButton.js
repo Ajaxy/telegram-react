@@ -22,11 +22,11 @@ class MediaViewerButton extends React.Component {
     };
 
     render() {
-        const { disabled, grow, children } = this.props;
+        const { disabled, extended, children } = this.props;
 
         const className = classNames(
             disabled ? 'media-viewer-button-disabled' : 'media-viewer-button',
-            { grow: grow }
+            { 'media-viewer-button-extended': extended }
         );
 
         return (
@@ -39,6 +39,7 @@ class MediaViewerButton extends React.Component {
 
 MediaViewerButton.propTypes = {
     disabled: PropTypes.bool,
+    extended: PropTypes.bool,
     onClick: PropTypes.func
 };
 

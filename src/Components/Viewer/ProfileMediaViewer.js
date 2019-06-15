@@ -26,6 +26,8 @@ import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
+import classNames from 'classnames';
+
 import './ProfileMediaViewer.css';
 
 const forwardIconStyle = {
@@ -245,14 +247,14 @@ class ProfileMediaViewer extends React.Component {
         }
     };
 
-    hasPreviousMedia = index => {
+    hasNextMedia = index => {
         if (index === -1) return false;
 
         const nextIndex = index + 1;
         return nextIndex < this.history.length;
     };
 
-    handlePrevious = event => {
+    handleNext = event => {
         if (event) {
             event.stopPropagation();
         }
@@ -262,7 +264,7 @@ class ProfileMediaViewer extends React.Component {
 
         return this.loadMedia(nextIndex, () => {
             if (nextIndex === this.history.length - 1) {
-                this.loadPrevious();
+                this.loadNext();
             }
         });
     };
@@ -271,14 +273,14 @@ class ProfileMediaViewer extends React.Component {
         return;
     };
 
-    hasNextMedia = index => {
+    hasPreviousMedia = index => {
         if (index === -1) return false;
 
         const nextIndex = index - 1;
         return nextIndex >= 0;
     };
 
-    handleNext = event => {
+    handlePrevious = event => {
         if (event) {
             event.stopPropagation();
         }
@@ -288,7 +290,7 @@ class ProfileMediaViewer extends React.Component {
 
         return this.loadMedia(nextIndex, () => {
             if (nextIndex === 0) {
-                this.loadNext();
+                this.loadPrevious();
             }
         });
     };
@@ -342,25 +344,29 @@ class ProfileMediaViewer extends React.Component {
         return (
             <div className='media-viewer'>
                 {deleteConfirmation}
-                <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
+                <div className='media-viewer-wrapper'>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder' />
-                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
+                        <MediaViewerButton disabled={!hasPreviousMedia} extended onClick={this.handlePrevious}>
                             <NavigateBeforeIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
+                        <div className='media-viewer-button-placeholder' />
                     </div>
 
-                    <div className='media-viewer-content-column'>
-                        <ProfileMediaViewerContent chatId={chatId} photo={photo} onClick={this.handlePrevious} />
+                    <div
+                        className={classNames('media-viewer-content-column', { 'cursor-pointer': hasNextMedia })}
+                        onClick={this.handleNext}>
+                        <ProfileMediaViewerContent chatId={chatId} photo={photo} onClick={this.handleNext} />
                     </div>
 
                     <div className='media-viewer-right-column'>
                         <MediaViewerButton onClick={this.handleClose}>
                             <CloseIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
-                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
+                        <MediaViewerButton disabled={!hasNextMedia} extended onClick={this.handleNext}>
                             <NavigateNextIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
+                        <div className='media-viewer-button-placeholder' />
                     </div>
                 </div>
                 <div className='media-viewer-footer'>

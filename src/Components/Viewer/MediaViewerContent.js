@@ -205,6 +205,8 @@ class MediaViewerContent extends React.Component {
 
     handleContentClick = event => {
         if (event) event.stopPropagation();
+
+        this.props.onClick(event);
     };
 
     changeSpeed = speed => {

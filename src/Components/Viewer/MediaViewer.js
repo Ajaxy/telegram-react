@@ -921,21 +921,24 @@ class MediaViewer extends React.Component {
         return (
             <div className={classNames('media-viewer', background)}>
                 {deleteConfirmation}
-                <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
+                <div className='media-viewer-wrapper'>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder' />
-                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
+                        <MediaViewerButton disabled={!hasPreviousMedia} extended onClick={this.handlePrevious}>
                             <NavigateBeforeIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
+                        <div className='media-viewer-button-placeholder' />
                     </div>
 
-                    <div className='media-viewer-content-column'>
+                    <div
+                        className={classNames('media-viewer-content-column', { 'cursor-pointer': hasNextMedia })}
+                        onClick={this.handleNext}>
                         <MediaViewerContent
                             ref={this.contentRef}
                             chatId={chatId}
                             messageId={currentMessageId}
                             size={PHOTO_BIG_SIZE}
-                            onClick={this.handlePrevious}
+                            onClick={this.handleNext}
                         />
                     </div>
 
@@ -943,9 +946,10 @@ class MediaViewer extends React.Component {
                         <MediaViewerButton onClick={this.handleClose}>
                             <CloseIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
-                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
+                        <MediaViewerButton disabled={!hasNextMedia} extended onClick={this.handleNext}>
                             <NavigateNextIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
+                        <div className='media-viewer-button-placeholder' />
                     </div>
                 </div>
                 <div className='media-viewer-footer'>
