@@ -6,7 +6,7 @@
  */
 
 .media-viewer {
-    z-index: 2;
+    z-index: 1350; /* Must be between MUI modal and snackbar */
     position: fixed;
     top: 0;
     right: 0;
