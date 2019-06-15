@@ -318,7 +318,7 @@ class Header extends Component {
             switch (authorizationState['@type']) {
                 case 'authorizationStateClosed':
                     break;
-                case ' authorizationStateClosing':
+                case 'authorizationStateClosing':
                     break;
                 case 'authorizationStateLoggingOut':
                     title = this.localize('Logging out');
