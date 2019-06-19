@@ -1,0 +1,61 @@
+/*
+ *  Copyright (c) 2018-present, Alexander Zinchuk
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.message-placeholder {
+    animation: message-placeholder 2000ms ease-in-out infinite;
+}
+
+.message-placeholder-tile-photo {
+    background: #999999;
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    min-height: 48px;
+    border-radius: 50%;
+}
+
+.message-placeholder-wrapper {
+    max-width: 460px;
+    padding: 8px 15px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+}
+
+.message-placeholder-content {
+    margin-left: 12px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+}
+
+.message-placeholder-title {
+    height: 20px;
+    width: 100px;
+    background: #999999;
+    border-radius: 3px;
+    margin-bottom: 5px;
+}
+
+.message-placeholder-text {
+    height: 15px;
+    width: 200px;
+    background: #999999;
+    border-radius: 3px;
+}
+
+@keyframes message-placeholder {
+    0% {
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 0.1;
+    }
+    100% {
+        opacity: 0.2;
+    }
+}

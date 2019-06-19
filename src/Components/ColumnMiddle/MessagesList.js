@@ -11,6 +11,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import FilesDropTarget from './FilesDropTarget';
 import Message from '../Message/Message';
+import MessagePlaceholder from '../Message/MessagePlaceholder';
 import PinnedMessage from './PinnedMessage';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
@@ -59,7 +60,8 @@ class MessagesList extends React.Component {
             clearHistory: false,
             selectionActive: false,
             scrollBehavior: ScrollBehaviorEnum.NONE,
-            separatorMessageId: 0
+            separatorMessageId: 0,
+            firstSliceLoading: false
         };
 
         this.listRef = React.createRef();
@@ -128,7 +130,7 @@ class MessagesList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId, theme } = this.props;
-        const { playerOpened, history, dragging, clearHistory, selectionActive } = this.state;
+        const { playerOpened, history, dragging, clearHistory, selectionActive, firstSliceLoading } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -159,6 +161,10 @@ class MessagesList extends React.Component {
         }
 
         if (nextState.selectionActive !== selectionActive) {
+            return true;
+        }
+
+        if (nextState.firstSliceLoading !== firstSliceLoading) {
             return true;
         }
 
@@ -468,10 +474,12 @@ class MessagesList extends React.Component {
 
             MessagesList.viewMessages(result.messages);
 
-            this.loadIncompleteHistory(result);
-
             // load full info
             getChatFullInfo(chat.id);
+
+            this.setState({ firstSliceLoading: true });
+            await this.loadIncompleteHistory(result);
+            this.setState({ firstSliceLoading: false });
         } else {
             this.replace(
                 0,
@@ -1009,7 +1017,7 @@ class MessagesList extends React.Component {
 
     render() {
         const { classes, chatId } = this.props;
-        const { history, separatorMessageId, clearHistory, selectionActive } = this.state;
+        const { history, separatorMessageId, clearHistory, selectionActive, firstSliceLoading } = this.state;
 
         console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
 
@@ -1017,26 +1025,26 @@ class MessagesList extends React.Component {
         this.messages = clearHistory
             ? null
             : history.map((x, i) =>
-                  isServiceMessage(x) ? (
-                      <ServiceMessage
-                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                          ref={el => this.itemsMap.set(i, el)}
-                          chatId={x.chat_id}
-                          messageId={x.id}
-                          showUnreadSeparator={separatorMessageId === x.id}
-                      />
-                  ) : (
-                      <Message
-                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                          ref={el => this.itemsMap.set(i, el)}
-                          chatId={x.chat_id}
-                          messageId={x.id}
-                          showTitle
-                          sendingState={x.sending_state}
-                          showUnreadSeparator={separatorMessageId === x.id}
-                      />
-                  )
-              );
+                isServiceMessage(x) ? (
+                    <ServiceMessage
+                        key={`chat_id=${x.chat_id} message_id=${x.id}`}
+                        ref={el => this.itemsMap.set(i, el)}
+                        chatId={x.chat_id}
+                        messageId={x.id}
+                        showUnreadSeparator={separatorMessageId === x.id}
+                    />
+                ) : (
+                    <Message
+                        key={`chat_id=${x.chat_id} message_id=${x.id}`}
+                        ref={el => this.itemsMap.set(i, el)}
+                        chatId={x.chat_id}
+                        messageId={x.id}
+                        showTitle
+                        sendingState={x.sending_state}
+                        showUnreadSeparator={separatorMessageId === x.id}
+                    />
+                )
+            );
 
         return (
             <div
@@ -1047,6 +1055,9 @@ class MessagesList extends React.Component {
                 <div ref={this.listRef} className='messages-list-wrapper' onScroll={this.handleScroll}>
                     <div className='messages-list-top' />
                     <div ref={this.itemsRef} className='messages-list-items'>
+                        {firstSliceLoading && (
+                            Array.from(Array(10), (_, i) => <MessagePlaceholder index={i} key={i} />)
+                        )}
                         {this.messages}
                     </div>
                 </div>
