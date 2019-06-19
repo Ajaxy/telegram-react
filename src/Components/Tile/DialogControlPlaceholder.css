@@ -1,0 +1,76 @@
+/*
+ *  Copyright (c) 2018-present, Alexander Zinchuk
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.dialog-placeholder {
+    margin: 0 12px;
+    animation: dialog-placeholder 2000ms ease-in-out infinite;
+}
+
+.dialog-placeholder-chat-tile {
+    position: relative;
+    height: 48px;
+}
+
+.dialog-placeholder-tile-first-row {
+    display: flex;
+}
+
+.dialog-placeholder-tile-second-row {
+    margin: 3px 0 0 0;
+    display: flex;
+}
+
+.dialog-placeholder-inner-wrapper {
+    width: 48px;
+    overflow: hidden;
+    flex-grow: 1;
+    margin-left: 12px;
+    z-index: 1;
+}
+
+.dialog-placeholder-wrapper {
+    padding: 10px 12px 10px 10px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+
+.dialog-placeholder-tile-photo {
+    background: #999999;
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    min-height: 48px;
+    border-radius: 50%;
+}
+
+.dialog-placeholder-title {
+    height: 20px;
+    width: 100px;
+    background: #999999;
+    border-radius: 3px;
+    margin-bottom: 5px;
+}
+
+.dialog-placeholder-content {
+    height: 15px;
+    width: 200px;
+    background: #999999;
+    border-radius: 3px;
+}
+
+@keyframes dialog-placeholder {
+    0% {
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 0.1;
+    }
+    100% {
+        opacity: 0.2;
+    }
+}

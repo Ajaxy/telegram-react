@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { Scrollbars } from 'react-custom-scrollbars';
+import { Fade } from '@material-ui/core';
 import DialogControl from '../Tile/DialogControl';
+import DialogControlPlaceholder from '../Tile/DialogControlPlaceholder';
 import { CHAT_SLICE_LIMIT } from '../../Constants';
 import { loadChatsContent } from '../../Utils/File';
 import { itemsInView, orderCompare, throttle } from '../../Utils/Common';
@@ -30,12 +32,17 @@ class DialogsList extends React.Component {
         this.state = {
             chats: [],
             authorizationState: ApplicationStore.getAuthorizationState(),
-            connectionState: ApplicationStore.getConnectionState()
+            connectionState: ApplicationStore.getConnectionState(),
+            firstSliceLoaded: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (nextState.chats !== this.state.chats) {
+            return true;
+        }
+
+        if (nextState.firstSliceLoaded !== this.state.firstSliceLoaded) {
             return true;
         }
 
@@ -290,6 +297,10 @@ class DialogsList extends React.Component {
             limit: CHAT_SLICE_LIMIT
         }).finally(() => {
             this.loading = false;
+
+            if (!this.state.firstSliceLoaded) {
+                this.setState({ firstSliceLoaded: true });
+            }
         });
 
         //TODO: replace result with one-way data flow
@@ -326,7 +337,7 @@ class DialogsList extends React.Component {
     }
 
     render() {
-        const { chats } = this.state;
+        const { chats, firstSliceLoaded } = this.state;
 
         const dialogs = chats.map(x => <DialogControl key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
 
@@ -341,7 +352,11 @@ class DialogsList extends React.Component {
 
         return (
             <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>
-                {dialogs}
+                <Fade in={firstSliceLoaded}>
+                    <div>{dialogs}</div>
+                </Fade>
+
+                {!firstSliceLoaded && Array.from(Array(10), (_, i) => <DialogControlPlaceholder index={i} key={i} />)}
             </div>
         );
     }

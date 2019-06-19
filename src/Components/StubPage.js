@@ -15,6 +15,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import { borderStyle } from './Theme';
+import DialogControlPlaceholder from './Tile/DialogControlPlaceholder';
 import Footer from './Footer';
 import './ColumnMiddle/Header.css';
 import './ColumnLeft/Dialogs.css';
@@ -61,6 +62,11 @@ class StubPage extends React.Component {
                             <IconButton className={classes.headerIconButton} aria-label={t('Search')}>
                                 <SearchIcon />
                             </IconButton>
+                        </div>
+                        <div className='dialogs-content'>
+                            {Array.from(Array(10), (_, i) => (
+                                <DialogControlPlaceholder index={i} key={i} />
+                            ))}
                         </div>
                     </div>
                     <div
