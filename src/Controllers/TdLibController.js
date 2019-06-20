@@ -21,7 +21,7 @@ class TdLibController extends EventEmitter {
             verbosity: 1,
             jsVerbosity: 3,
             fastUpdating: true,
-            useDatabase: false,
+            useDatabase: true,
             mode: 'wasm'
         };
 
