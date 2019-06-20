@@ -48,9 +48,9 @@ class MessageAuthor extends React.Component {
             const fullName = getUserFullName(user);
 
             return openUser ? (
-                <a className={className} onClick={this.handleSelect}>
-                    {fullName}
-                </a>
+                <div className={className}>
+                    <a onClick={this.handleSelect}>{fullName}</a>
+                </div>
             ) : (
                 <>{fullName}</>
             );
@@ -63,9 +63,9 @@ class MessageAuthor extends React.Component {
             const fullName = getChatTitle(chatId, false, t);
 
             return openChat ? (
-                <a className={className} onClick={this.handleSelect}>
-                    {fullName}
-                </a>
+                <div className={className}>
+                    <a onClick={this.handleSelect}>{fullName}</a>
+                </div>
             ) : (
                 <>{fullName}</>
             );
