@@ -288,7 +288,7 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { sending_state, views, edit_date, reply_to_message_id, forward_info } = message;
+        const { views, edit_date, reply_to_message_id, forward_info } = message;
 
         const text = getText(message);
         const webPage = getWebPage(message);
@@ -324,9 +324,6 @@ class Message extends Component {
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
                     <i className='message-select-tick' />
-                    {this.unread && (
-                        <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
-                    )}
                     {tile}
                     <div className='message-content'>
                         <div className='message-title'>
@@ -345,6 +342,7 @@ class Message extends Component {
                                     </>
                                 )}
                                 {edit_date > 0 && <span>{t('EditedMessage')}&nbsp;</span>}
+                                <MessageStatus chatId={chatId} messageId={messageId} />
                                 <a className='message-date' onClick={this.handleDateClick}>
                                     <span title={dateHint}>{date}</span>
                                 </a>

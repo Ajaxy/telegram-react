@@ -5,30 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.messagestatus-icon {
-    pointer-events: none;
-    border: 0;
+.message-status {
+    font-size: 15px;
+    margin: 2px 5px;
+}
+
+.message-status svg {
     display: block;
-    width: 10px;
-    height: 10px;
-    border-radius: 7px;
-    position: absolute;
-    margin-left: -26px;
-    margin-top: 16px;
-    opacity: 1;
-}
-
-.messagestatus-failed {
-    background: indianred;
-    opacity: 1;
-}
-
-.messagestatus-succeeded {
-    background: #4eabf1;
-    opacity: 1;
-}
-
-.messagestatus-pending {
-    background: #4eabf1;
-    opacity: 0.5;
 }

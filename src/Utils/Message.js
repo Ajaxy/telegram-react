@@ -1464,6 +1464,13 @@ function getSendingState(message) {
     return message.sending_state['@type'] === 'messageSendingStateFailed' ? 'failed' : 'pending';
 }
 
+function getOutgoingStatus(message) {
+    if (!message) return;
+    if (!message.is_outgoing) return;
+    if (!getUnread(message)) return 'read';
+    return getSendingState(message);
+}
+
 export {
     getAuthor,
     getTitle,
@@ -1492,5 +1499,6 @@ export {
     getSearchMessagesFilter,
     openMedia,
     getReplyPhotoSize,
-    getSendingState
+    getSendingState,
+    getOutgoingStatus
 };

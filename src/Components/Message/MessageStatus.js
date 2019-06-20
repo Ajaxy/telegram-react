@@ -6,64 +6,73 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
 import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
+import { getOutgoingStatus } from '../../Utils/Message';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import ScheduleIcon from '@material-ui/icons/Schedule';
+import DoneIcon from '@material-ui/icons/Done';
+import DoneAllIcon from '@material-ui/icons/DoneAll';
 import './MessageStatus.css';
 
 class MessageStatus extends React.Component {
     constructor(props) {
         super(props);
-        this.handleUpdateMessageSend = this.handleUpdateMessageSend.bind(this);
-        this.handleUpdateChatReadOutbox = this.handleUpdateChatReadOutbox.bind(this);
-
-        this.state = {
-            sendingState: props.sendingState,
-            unread: true
-        };
     }
 
     componentDidMount() {
         MessageStore.on('updateMessageSendFailed', this.handleUpdateMessageSend);
         MessageStore.on('updateMessageSendSucceeded', this.handleUpdateMessageSend);
-
         ChatStore.on('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
-    }
-
-    handleUpdateMessageSend(payload) {
-        if (this.props.messageId === payload.old_message_id && payload.message) {
-            this.newMessageId = payload.message.id;
-            this.setState({ sendingState: payload.message.sending_state });
-        }
-    }
-
-    handleUpdateChatReadOutbox(payload) {
-        if (
-            this.props.chatId === payload.chat_id &&
-            ((this.props.newMessageId && this.props.newMessageId <= payload.last_read_outbox_message_id) ||
-                this.props.messageId <= payload.last_read_outbox_message_id)
-        ) {
-            this.setState({ sendingState: null, unread: false });
-        }
     }
 
     componentWillUnmount() {
         MessageStore.removeListener('updateMessageSendFailed', this.handleUpdateMessageSend);
         MessageStore.removeListener('updateMessageSendSucceeded', this.handleUpdateMessageSend);
-
         ChatStore.removeListener('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
     }
 
+    handleUpdateMessageSend = payload => {
+        if (this.props.messageId === payload.old_message_id && payload.message) {
+            this.newMessageId = payload.message.id;
+            this.forceUpdate();
+        }
+    };
+
+    handleUpdateChatReadOutbox = payload => {
+        if (
+            this.props.chatId === payload.chat_id &&
+            ((this.props.newMessageId && this.props.newMessageId <= payload.last_read_outbox_message_id) ||
+                this.props.messageId <= payload.last_read_outbox_message_id)
+        ) {
+            this.forceUpdate();
+        }
+    };
+
     render() {
-        let stateClassName = 'messagestatus-succeeded';
-        if (this.state.sendingState) {
-            stateClassName =
-                this.state.sendingState['@type'] === 'messageSendingStateFailed'
-                    ? 'messagestatus-failed'
-                    : 'messagestatus-pending';
+        const { chatId, messageId } = this.props;
+        const message = MessageStore.get(chatId, messageId);
+        const status = getOutgoingStatus(message);
+
+        if (!status) return null;
+
+        let statusIcon = null;
+        switch (status) {
+            case 'failed':
+                statusIcon = <ErrorOutlineIcon fontSize='inherit' color='error' />;
+                break;
+            case 'pending':
+                statusIcon = <ScheduleIcon fontSize='inherit' color='disabled' />;
+                break;
+            case 'succeeded':
+                statusIcon = <DoneIcon fontSize='inherit' color='primary' />;
+                break;
+            case 'read':
+                statusIcon = <DoneAllIcon fontSize='inherit' color='primary' />;
+                break;
         }
 
-        return this.state.unread && <i className={classNames('messagestatus-icon', stateClassName)} />;
+        return <div className='message-status'>{statusIcon}</div>;
     }
 }
 

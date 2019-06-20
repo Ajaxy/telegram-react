@@ -93,7 +93,7 @@ pre code {
 }
 
 .message-wrapper {
-    max-width: 460px;
+    max-width: 480px;
     padding: 8px 15px;
     margin: 0 auto;
     display: flex;
@@ -123,6 +123,7 @@ pre code {
     user-select: none;
     color: #adadad;
     font-size: 0.85em;
+    display: flex;
 }
 
 .message-body {
@@ -154,7 +155,7 @@ pre code {
     position: absolute;
     width: 26px;
     height: 26px;
-    margin: 9px 0 0 -59px;
+    margin: 9px 0 0 -42px;
     display: block;
     background-image: url(../../Assets/Icons/IconsetW_2x.png);
     background-size: 42px 1171px;

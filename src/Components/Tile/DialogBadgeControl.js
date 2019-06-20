@@ -8,8 +8,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { getChatUnreadCount, getChatUnreadMentionCount, isChatMuted, showChatDraft } from '../../Utils/Chat';
-import { getSendingState, getUnread } from '../../Utils/Message';
+import { getChatUnreadCount, getChatUnreadMentionCount, isChatMuted } from '../../Utils/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogBadgeControl.css';
@@ -117,16 +116,12 @@ class DialogBadgeControl extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const isUnread = getUnread(chat.last_message);
-        const sendingState = isUnread && getSendingState(chat.last_message);
         const unreadCount = getChatUnreadCount(chat);
         const unreadMentionCount = getChatUnreadMentionCount(chat);
         const showUnreadCount = unreadCount > 1 || (unreadCount === 1 && unreadMentionCount < 1);
-        const showDraftChat = showChatDraft(chat.id);
 
         return (
             <>
-                {sendingState && !showDraftChat && <i className={`dialog-badge-sending-state-${sendingState}`} />}
                 {unreadMentionCount && (
                     <div className={classNames('dialog-badge', classes.dialogBadge)}>
                         <div className='dialog-badge-mention'>@</div>
@@ -141,7 +136,7 @@ class DialogBadgeControl extends React.Component {
                         )}>
                         <span className='dialog-badge-text'>{unreadCount}</span>
                     </div>
-                ) : chat.is_pinned && !sendingState ? (
+                ) : chat.is_pinned ? (
                     <i className='dialog-badge-pinned' />
                 ) : null}
             </>
