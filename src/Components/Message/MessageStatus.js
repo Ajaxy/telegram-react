@@ -55,7 +55,7 @@ class MessageStatus extends React.Component {
     }
 
     render() {
-        let stateClassName = 'messagestatus-succeded';
+        let stateClassName = 'messagestatus-succeeded';
         if (this.state.sendingState) {
             stateClassName =
                 this.state.sendingState['@type'] === 'messageSendingStateFailed'

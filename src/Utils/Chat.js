@@ -200,13 +200,6 @@ function getLastMessageContent(chat, t = key => key) {
     return getContent(last_message, t);
 }
 
-function getChatUnreadMessageIcon(chat) {
-    if (!chat) return false;
-    if (!chat.last_message) return false;
-
-    return chat.last_message.is_outgoing && chat.last_message.id > chat.last_read_outbox_message_id;
-}
-
 function getChatUnreadCount(chat) {
     if (!chat) return null;
     if (!chat.unread_count) return null;
@@ -1164,7 +1157,6 @@ export {
     getChatDraft,
     getChatDraftReplyToMessageId,
     getChatTypingString,
-    getChatUnreadMessageIcon,
     getChatUnreadCount,
     getChatUnreadMentionCount,
     getChatMuteFor,

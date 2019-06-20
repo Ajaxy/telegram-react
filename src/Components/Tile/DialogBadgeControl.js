@@ -8,13 +8,8 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import {
-    getChatUnreadCount,
-    getChatUnreadMentionCount,
-    getChatUnreadMessageIcon,
-    isChatMuted,
-    showChatDraft
-} from '../../Utils/Chat';
+import { getChatUnreadCount, getChatUnreadMentionCount, isChatMuted, showChatDraft } from '../../Utils/Chat';
+import { getSendingState, getUnread } from '../../Utils/Message';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogBadgeControl.css';
@@ -53,6 +48,7 @@ class DialogBadgeControl extends React.Component {
         ChatStore.on('updateChatReadInbox', this.onUpdate);
         ChatStore.on('updateChatReadOutbox', this.onUpdate);
         ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.on('updateChatLastMessage', this.onUpdate);
         ApplicationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
@@ -66,6 +62,7 @@ class DialogBadgeControl extends React.Component {
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateChatReadOutbox', this.onUpdate);
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
@@ -120,7 +117,8 @@ class DialogBadgeControl extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const unreadMessageIcon = getChatUnreadMessageIcon(chat);
+        const isUnread = getUnread(chat.last_message);
+        const sendingState = isUnread && getSendingState(chat.last_message);
         const unreadCount = getChatUnreadCount(chat);
         const unreadMentionCount = getChatUnreadMentionCount(chat);
         const showUnreadCount = unreadCount > 1 || (unreadCount === 1 && unreadMentionCount < 1);
@@ -128,7 +126,7 @@ class DialogBadgeControl extends React.Component {
 
         return (
             <>
-                {unreadMessageIcon && !showDraftChat && <i className='dialog-badge-unread' />}
+                {sendingState && !showDraftChat && <i className={`dialog-badge-sending-state-${sendingState}`} />}
                 {unreadMentionCount && (
                     <div className={classNames('dialog-badge', classes.dialogBadge)}>
                         <div className='dialog-badge-mention'>@</div>
@@ -143,7 +141,7 @@ class DialogBadgeControl extends React.Component {
                         )}>
                         <span className='dialog-badge-text'>{unreadCount}</span>
                     </div>
-                ) : chat.is_pinned && !unreadMessageIcon ? (
+                ) : chat.is_pinned && !sendingState ? (
                     <i className='dialog-badge-pinned' />
                 ) : null}
             </>

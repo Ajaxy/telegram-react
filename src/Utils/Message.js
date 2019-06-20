@@ -1457,6 +1457,13 @@ function getReplyPhotoSize(chatId, messageId) {
     return null;
 }
 
+function getSendingState(message) {
+    if (!message) return;
+    if (!message.is_outgoing) return;
+    if (!message.sending_state) return 'succeeded';
+    return message.sending_state['@type'] === 'messageSendingStateFailed' ? 'failed' : 'pending';
+}
+
 export {
     getAuthor,
     getTitle,
@@ -1484,5 +1491,6 @@ export {
     hasVideoNote,
     getSearchMessagesFilter,
     openMedia,
-    getReplyPhotoSize
+    getReplyPhotoSize,
+    getSendingState
 };
