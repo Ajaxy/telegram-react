@@ -662,7 +662,7 @@ class InputBoxControl extends Component {
                             {/*<KeyboardVoiceIcon />*/}
                             {/*</IconButton>*/}
                             <IconButton className={classes.iconButton} aria-label='Send' onClick={this.handleSubmit}>
-                                <SendIcon />
+                                <SendIcon color='primary' />
                             </IconButton>
                         </div>
                     </div>
