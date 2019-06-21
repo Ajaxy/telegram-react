@@ -18,14 +18,12 @@ class UserControl extends React.Component {
         return nextProps.userId !== this.props.userId;
     }
 
-    handleClick = () => {
+    handleClick = event => {
         const { userId, onSelect } = this.props;
-
-        const user = UserStore.get(userId);
-        if (!user) return;
         if (!onSelect) return;
 
-        onSelect(user);
+        event.stopPropagation();
+        onSelect(userId);
     };
 
     render() {

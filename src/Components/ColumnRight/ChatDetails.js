@@ -48,7 +48,7 @@ import {
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUsersContent, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
-import { openChat } from '../../Actions/Client';
+import { openChat, openUser } from '../../Actions/Client';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
@@ -348,6 +348,10 @@ class ChatDetails extends React.Component {
                 chatId: 0
             });
         }
+    };
+
+    handleSelectUser = userId => {
+        openUser(userId, true);
     };
 
     getContentHeight = () => {
