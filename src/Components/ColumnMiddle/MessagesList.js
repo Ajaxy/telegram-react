@@ -15,13 +15,13 @@ import MessagePlaceholder from '../Message/MessagePlaceholder';
 import PinnedMessage from './PinnedMessage';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
-import { debounce, throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
+import { throttle, getPhotoSize, itemsInView, pause } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isSupergroup } from '../../Utils/Chat';
 import { highlightMessage } from '../../Actions/Client';
-import { MESSAGE_SLICE_LIMIT } from '../../Constants';
+import { CONTENTS_PRELOAD_DELAY, MESSAGE_SLICE_LIMIT } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -459,18 +459,19 @@ class MessagesList extends React.Component {
                 scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_UNREAD;
             }
 
+            // load files
+            const store = FileStore.getStore();
+            loadMessageContents(store, result.messages);
+            loadChatsContent(store, [chatId]);
+            loadDraftContent(store, chatId);
+            await pause(CONTENTS_PRELOAD_DELAY);
+
             this.replace(separatorMessageId, result.messages, scrollBehavior, () => {
                 this.suppressHandleScrollOnSelectChat = false;
                 if (messageId) {
                     highlightMessage(chatId, messageId);
                 }
             });
-
-            // load files
-            const store = FileStore.getStore();
-            loadMessageContents(store, result.messages);
-            loadChatsContent(store, [chatId]);
-            loadDraftContent(store, chatId);
 
             MessagesList.viewMessages(result.messages);
 
@@ -571,15 +572,23 @@ class MessagesList extends React.Component {
         this.loading = true;
 
         const sessionId = this.sessionId;
-        let result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: chatId,
-            from_message_id: fromMessageId,
-            offset: 0,
-            limit: MESSAGE_SLICE_LIMIT
-        }).finally(() => {
+
+        let result;
+        try {
+            result = await TdLibController.send({
+                '@type': 'getChatHistory',
+                chat_id: chatId,
+                from_message_id: fromMessageId,
+                offset: 0,
+                limit: MESSAGE_SLICE_LIMIT
+            });
+
+            const store = FileStore.getStore();
+            loadMessageContents(store, result.messages);
+            await pause(CONTENTS_PRELOAD_DELAY);
+        } finally {
             this.loading = false;
-        });
+        }
 
         if (sessionId !== this.sessionId) {
             return;
@@ -597,8 +606,6 @@ class MessagesList extends React.Component {
                 this.onLoadMigratedHistory();
             }
         });
-        const store = FileStore.getStore();
-        loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
 
         return result;
@@ -642,15 +649,23 @@ class MessagesList extends React.Component {
         this.loading = true;
 
         const sessionId = this.sessionId;
-        const result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: basicGroupChat.id,
-            from_message_id: fromMessageId,
-            offset: 0,
-            limit: MESSAGE_SLICE_LIMIT
-        }).finally(() => {
+
+        let result;
+        try {
+            result = await TdLibController.send({
+                '@type': 'getChatHistory',
+                chat_id: basicGroupChat.id,
+                from_message_id: fromMessageId,
+                offset: 0,
+                limit: MESSAGE_SLICE_LIMIT
+            });
+
+            const store = FileStore.getStore();
+            loadMessageContents(store, result.messages);
+            await pause(CONTENTS_PRELOAD_DELAY);
+        } finally {
             this.loading = false;
-        });
+        }
 
         if (sessionId !== this.sessionId) {
             return;
@@ -664,8 +679,6 @@ class MessagesList extends React.Component {
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         this.insertBefore(this.filterMessages(result.messages));
-        const store = FileStore.getStore();
-        loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
     };
 
@@ -685,15 +698,23 @@ class MessagesList extends React.Component {
         this.loading = true;
 
         const sessionId = this.sessionId;
-        let result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: chatId,
-            from_message_id: fromMessageId,
-            offset: -MESSAGE_SLICE_LIMIT - 1,
-            limit: MESSAGE_SLICE_LIMIT + 1
-        }).finally(() => {
+
+        let result;
+        try {
+            result = await TdLibController.send({
+                '@type': 'getChatHistory',
+                chat_id: chatId,
+                from_message_id: fromMessageId,
+                offset: -MESSAGE_SLICE_LIMIT - 1,
+                limit: MESSAGE_SLICE_LIMIT + 1
+            });
+
+            const store = FileStore.getStore();
+            loadMessageContents(store, result.messages);
+            await pause(CONTENTS_PRELOAD_DELAY);
+        } finally {
             this.loading = false;
-        });
+        }
 
         if (sessionId !== this.sessionId) {
             return;
@@ -717,8 +738,6 @@ class MessagesList extends React.Component {
         result.messages.reverse();
         console.log('SCROLL MessagesList.onLoadPrevious scrollBehavior=NONE');
         this.insertAfter(this.filterMessages(result.messages), ScrollBehaviorEnum.NONE);
-        const store = FileStore.getStore();
-        loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
 
         return result;
@@ -962,13 +981,24 @@ class MessagesList extends React.Component {
         const limit = MESSAGE_SLICE_LIMIT;
 
         const sessionId = this.sessionId;
-        const result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: chat.id,
-            from_message_id: fromMessageId,
-            offset: offset,
-            limit: limit
-        });
+
+        let result;
+        try {
+            result = await TdLibController.send({
+                '@type': 'getChatHistory',
+                chat_id: chat.id,
+                from_message_id: fromMessageId,
+                offset: offset,
+                limit: limit
+            });
+
+            const store = FileStore.getStore();
+            loadMessageContents(store, result.messages);
+            loadChatsContent(store, [chatId]);
+            await pause(CONTENTS_PRELOAD_DELAY);
+        } finally {
+            this.loading = false;
+        }
 
         if (sessionId !== this.sessionId) {
             return;
@@ -995,11 +1025,6 @@ class MessagesList extends React.Component {
 
         this.replace(separatorMessageId, result.messages, ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
 
-        // load files
-        const store = FileStore.getStore();
-        loadMessageContents(store, result.messages);
-        loadChatsContent(store, [chatId]);
-
         MessagesList.viewMessages(result.messages);
 
         this.loadIncompleteHistory(result);
@@ -1025,26 +1050,26 @@ class MessagesList extends React.Component {
         this.messages = clearHistory
             ? null
             : history.map((x, i) =>
-                isServiceMessage(x) ? (
-                    <ServiceMessage
-                        key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                        ref={el => this.itemsMap.set(i, el)}
-                        chatId={x.chat_id}
-                        messageId={x.id}
-                        showUnreadSeparator={separatorMessageId === x.id}
-                    />
-                ) : (
-                    <Message
-                        key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                        ref={el => this.itemsMap.set(i, el)}
-                        chatId={x.chat_id}
-                        messageId={x.id}
-                        showTitle
-                        sendingState={x.sending_state}
-                        showUnreadSeparator={separatorMessageId === x.id}
-                    />
-                )
-            );
+                  isServiceMessage(x) ? (
+                      <ServiceMessage
+                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
+                          ref={el => this.itemsMap.set(i, el)}
+                          chatId={x.chat_id}
+                          messageId={x.id}
+                          showUnreadSeparator={separatorMessageId === x.id}
+                      />
+                  ) : (
+                      <Message
+                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
+                          ref={el => this.itemsMap.set(i, el)}
+                          chatId={x.chat_id}
+                          messageId={x.id}
+                          showTitle
+                          sendingState={x.sending_state}
+                          showUnreadSeparator={separatorMessageId === x.id}
+                      />
+                  )
+              );
 
         return (
             <div
@@ -1055,9 +1080,7 @@ class MessagesList extends React.Component {
                 <div ref={this.listRef} className='messages-list-wrapper' onScroll={this.handleScroll}>
                     <div className='messages-list-top' />
                     <div ref={this.itemsRef} className='messages-list-items'>
-                        {firstSliceLoading && (
-                            Array.from(Array(10), (_, i) => <MessagePlaceholder index={i} key={i} />)
-                        )}
+                        {firstSliceLoading && Array.from(Array(10), (_, i) => <MessagePlaceholder index={i} key={i} />)}
                         {this.messages}
                     </div>
                 </div>

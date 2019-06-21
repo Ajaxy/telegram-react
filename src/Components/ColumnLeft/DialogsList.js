@@ -10,9 +10,9 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import { Fade } from '@material-ui/core';
 import DialogControl from '../Tile/DialogControl';
 import DialogControlPlaceholder from '../Tile/DialogControlPlaceholder';
-import { CHAT_SLICE_LIMIT } from '../../Constants';
+import { CHAT_SLICE_LIMIT, CONTENTS_PRELOAD_DELAY } from '../../Constants';
 import { loadChatsContent } from '../../Utils/File';
-import { itemsInView, orderCompare, throttle } from '../../Utils/Common';
+import { itemsInView, orderCompare, pause, throttle } from '../../Utils/Common';
 import ChatStore from '../../Stores/ChatStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
@@ -297,10 +297,6 @@ class DialogsList extends React.Component {
             limit: CHAT_SLICE_LIMIT
         }).finally(() => {
             this.loading = false;
-
-            if (!this.state.firstSliceLoaded) {
-                this.setState({ firstSliceLoaded: true });
-            }
         });
 
         //TODO: replace result with one-way data flow
@@ -309,10 +305,17 @@ class DialogsList extends React.Component {
             result.chat_ids.shift();
         }
 
+        this.loadChatContents(result.chat_ids);
+        await pause(CONTENTS_PRELOAD_DELAY);
+
+        if (!this.state.firstSliceLoaded) {
+            this.setState({ firstSliceLoaded: true });
+        }
+
         if (replace) {
-            this.replaceChats(result.chat_ids, () => this.loadChatContents(result.chat_ids));
+            this.replaceChats(result.chat_ids);
         } else {
-            this.appendChats(result.chat_ids, () => this.loadChatContents(result.chat_ids));
+            this.appendChats(result.chat_ids);
         }
     };
 
