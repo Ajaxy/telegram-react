@@ -318,6 +318,18 @@ class ProfileMediaViewer extends React.Component {
         return true;
     };
 
+    getHistoryPhoto(index) {
+        const inHistory = index >= 0 && index < this.history.length;
+        if (!inHistory) return;
+
+        const historyPhoto = getProfilePhoto(this.history[index]);
+
+        const blob = FileStore.getBlob(historyPhoto.big.id) || historyPhoto.big.id.blob;
+        if (!blob) return;
+
+        return historyPhoto;
+    }
+
     render() {
         const { chatId, t } = this.props;
         const {
@@ -336,9 +348,9 @@ class ProfileMediaViewer extends React.Component {
         }
 
         const deleteConfirmation = null;
-        const inHistory = index >= 0 && index < this.history.length;
-        const photo = inHistory ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
-        const userProfilePhoto = inHistory ? this.history[index] : null;
+        const historyPhoto = this.getHistoryPhoto(index);
+        const photo = historyPhoto || getPhotoFromChat(chatId);
+        const userProfilePhoto = historyPhoto ? this.history[index] : null;
         const { big: file } = photo;
 
         return (
@@ -379,7 +391,7 @@ class ProfileMediaViewer extends React.Component {
                     {isPrivateChat(chatId) && (
                         <MediaViewerFooterButton
                             title={t('Forward')}
-                            disabled={!inHistory}
+                            disabled={!historyPhoto}
                             onClick={this.handleForward}>
                             <ReplyIcon style={forwardIconStyle} />
                         </MediaViewerFooterButton>
