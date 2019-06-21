@@ -12,7 +12,7 @@ import DialogControl from '../Tile/DialogControl';
 import DialogControlPlaceholder from '../Tile/DialogControlPlaceholder';
 import { CHAT_SLICE_LIMIT, CONTENTS_PRELOAD_DELAY } from '../../Constants';
 import { loadChatsContent } from '../../Utils/File';
-import { itemsInView, orderCompare, pause, throttle } from '../../Utils/Common';
+import { orderCompare, waitSomeTime } from '../../Utils/Common';
 import ChatStore from '../../Stores/ChatStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
@@ -305,8 +305,7 @@ class DialogsList extends React.Component {
             result.chat_ids.shift();
         }
 
-        this.loadChatContents(result.chat_ids);
-        await pause(CONTENTS_PRELOAD_DELAY);
+        await waitSomeTime(this.loadChatContents(result.chat_ids), CONTENTS_PRELOAD_DELAY);
 
         if (!this.state.firstSliceLoaded) {
             this.setState({ firstSliceLoaded: true });
@@ -321,7 +320,7 @@ class DialogsList extends React.Component {
 
     loadChatContents(chats) {
         const store = FileStore.getStore();
-        loadChatsContent(store, chats);
+        return loadChatsContent(store, chats);
     }
 
     appendChats(chats, callback) {

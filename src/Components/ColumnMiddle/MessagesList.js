@@ -15,13 +15,13 @@ import MessagePlaceholder from '../Message/MessagePlaceholder';
 import PinnedMessage from './PinnedMessage';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
-import { throttle, getPhotoSize, itemsInView, pause } from '../../Utils/Common';
+import { throttle, getPhotoSize, itemsInView, waitSomeTime } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isSupergroup } from '../../Utils/Chat';
 import { highlightMessage } from '../../Actions/Client';
-import { CONTENTS_PRELOAD_DELAY, MESSAGE_SLICE_LIMIT } from '../../Constants';
+import { CONTENTS_PRELOAD_DELAY, MESSAGE_SLICE_LIMIT, MESSAGES_PLACEHOLDER_DELAY } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -461,10 +461,9 @@ class MessagesList extends React.Component {
 
             // load files
             const store = FileStore.getStore();
-            loadMessageContents(store, result.messages);
             loadChatsContent(store, [chatId]);
             loadDraftContent(store, chatId);
-            await pause(CONTENTS_PRELOAD_DELAY);
+            await waitSomeTime(loadMessageContents(store, result.messages), CONTENTS_PRELOAD_DELAY);
 
             this.replace(separatorMessageId, result.messages, scrollBehavior, () => {
                 this.suppressHandleScrollOnSelectChat = false;
@@ -478,8 +477,11 @@ class MessagesList extends React.Component {
             // load full info
             getChatFullInfo(chat.id);
 
-            this.setState({ firstSliceLoading: true });
+            const placeholdersTimeout = setTimeout(() => {
+                this.setState({ firstSliceLoading: true });
+            }, MESSAGES_PLACEHOLDER_DELAY);
             await this.loadIncompleteHistory(result);
+            clearTimeout(placeholdersTimeout);
             this.setState({ firstSliceLoading: false });
         } else {
             this.replace(
@@ -584,8 +586,7 @@ class MessagesList extends React.Component {
             });
 
             const store = FileStore.getStore();
-            loadMessageContents(store, result.messages);
-            await pause(CONTENTS_PRELOAD_DELAY);
+            await waitSomeTime(loadMessageContents(store, result.messages), CONTENTS_PRELOAD_DELAY);
         } finally {
             this.loading = false;
         }
@@ -661,8 +662,7 @@ class MessagesList extends React.Component {
             });
 
             const store = FileStore.getStore();
-            loadMessageContents(store, result.messages);
-            await pause(CONTENTS_PRELOAD_DELAY);
+            await waitSomeTime(loadMessageContents(store, result.messages), CONTENTS_PRELOAD_DELAY);
         } finally {
             this.loading = false;
         }
@@ -710,8 +710,7 @@ class MessagesList extends React.Component {
             });
 
             const store = FileStore.getStore();
-            loadMessageContents(store, result.messages);
-            await pause(CONTENTS_PRELOAD_DELAY);
+            await waitSomeTime(loadMessageContents(store, result.messages), CONTENTS_PRELOAD_DELAY);
         } finally {
             this.loading = false;
         }
@@ -993,9 +992,8 @@ class MessagesList extends React.Component {
             });
 
             const store = FileStore.getStore();
-            loadMessageContents(store, result.messages);
             loadChatsContent(store, [chatId]);
-            await pause(CONTENTS_PRELOAD_DELAY);
+            await waitSomeTime(loadMessageContents(store, result.messages), CONTENTS_PRELOAD_DELAY);
         } finally {
             this.loading = false;
         }

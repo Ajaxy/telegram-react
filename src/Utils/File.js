@@ -940,8 +940,9 @@ function loadMessageContents(store, messages) {
         }
     }
 
-    loadUsersContent(store, [...users.keys()]);
     loadReplies(store, chatId, [...replies.keys()]);
+
+    return loadUsersContent(store, [...users.keys()]);
 }
 
 function saveOrDownload(file, fileName, obj, callback) {
@@ -1352,13 +1353,21 @@ function loadUserFileContent(store, file, userId) {
     const blob = file.blob || FileStore.getBlob(id);
     if (blob) return;
 
-    FileStore.getLocalFile(
-        store,
-        file,
-        null,
-        () => FileStore.updateUserPhotoBlob(userId, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, user)
-    );
+    return new Promise(resolve => {
+        FileStore.getLocalFile(
+            store,
+            file,
+            null,
+            () => {
+                FileStore.updateUserPhotoBlob(userId, id);
+                resolve();
+            },
+            () => {
+                FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, user);
+                resolve();
+            }
+        );
+    });
 }
 
 function loadChatFileContent(store, file, chatId) {
@@ -1373,13 +1382,21 @@ function loadChatFileContent(store, file, chatId) {
     const blob = file.blob || FileStore.getBlob(id);
     if (blob) return;
 
-    FileStore.getLocalFile(
-        store,
-        file,
-        null,
-        () => FileStore.updateChatPhotoBlob(chatId, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, chat)
-    );
+    return new Promise(resolve => {
+        FileStore.getLocalFile(
+            store,
+            file,
+            null,
+            () => {
+                FileStore.updateChatPhotoBlob(chatId, id);
+                resolve();
+            },
+            () => {
+                FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, chat);
+                resolve();
+            }
+        );
+    });
 }
 
 function loadProfileMediaViewerContent(chatId, photos) {
@@ -1447,13 +1464,13 @@ function loadUserContent(store, userId) {
 
     const { small: file } = profile_photo;
 
-    loadUserFileContent(store, file, userId);
+    return loadUserFileContent(store, file, userId);
 }
 
 function loadUsersContent(store, ids) {
     if (!ids) return;
 
-    ids.forEach(id => loadUserContent(store, id));
+    return Promise.all(ids.map(id => loadUserContent(store, id)));
 }
 
 function loadChatContent(store, chatId) {
@@ -1465,13 +1482,13 @@ function loadChatContent(store, chatId) {
 
     const { small: file } = photo;
 
-    loadChatFileContent(store, file, chatId);
+    return loadChatFileContent(store, file, chatId);
 }
 
 function loadChatsContent(store, ids) {
     if (!ids) return;
 
-    ids.forEach(id => loadChatContent(store, id));
+    return Promise.all(ids.map(id => loadChatContent(store, id)));
 }
 
 function loadDraftContent(store, chatId) {

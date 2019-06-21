@@ -371,6 +371,10 @@ function pause(ms) {
     });
 }
 
+function waitSomeTime(promise, timeLimitMs) {
+    return Promise.race([promise, pause(timeLimitMs)]);
+}
+
 export {
     getBrowser,
     getOSName,
@@ -392,5 +396,6 @@ export {
     between,
     getDurationString,
     getRandomInt,
-    pause
+    pause,
+    waitSomeTime
 };
