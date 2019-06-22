@@ -154,23 +154,16 @@ class TelegramApp extends Component {
         const { inactive, authorizationState, fatalError } = this.state;
 
         const loading = t('Loading').replace('...', '');
-        let page = <StubPage title={loading} />;
+        let page = (
+            <React.Suspense fallback={<StubPage title={loading} />}>
+                <MainPage />
+            </React.Suspense>
+        );
 
         if (inactive) {
             page = <InactivePage />;
         } else if (authorizationState) {
             switch (authorizationState['@type']) {
-                case 'authorizationStateClosed':
-                case 'authorizationStateClosing':
-                case 'authorizationStateLoggingOut':
-                case 'authorizationStateReady': {
-                    page = (
-                        <React.Suspense fallback={<StubPage title='' />}>
-                            <MainPage />
-                        </React.Suspense>
-                    );
-                    break;
-                }
                 case 'authorizationStateWaitCode':
                 case 'authorizationStateWaitPassword':
                 case 'authorizationStateWaitPhoneNumber':
@@ -181,12 +174,6 @@ class TelegramApp extends Component {
                         />
                     );
                     break;
-                case 'authorizationStateWaitEncryptionKey': {
-                    break;
-                }
-                case 'authorizationStateWaitTdlibParameters': {
-                    break;
-                }
             }
         }
 
