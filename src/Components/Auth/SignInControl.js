@@ -111,7 +111,16 @@ class SignInControl extends React.Component {
             .catch(error => {
                 let errorString = null;
                 if (error && error['@type'] === 'error' && error.message) {
-                    errorString = error.message;
+                    switch (error.code) {
+                        case 429:
+                            errorString = error.message.replace(/\d+$/, seconds => {
+                                const minutes = Math.ceil(parseInt(seconds) / 60);
+                                return minutes > 1 ? `${minutes} minutes` : 'a minute';
+                            });
+                            break;
+                        default:
+                            errorString = error.message;
+                    }
                 } else {
                     errorString = JSON.stringify(error);
                 }
