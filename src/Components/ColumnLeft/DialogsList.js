@@ -32,17 +32,12 @@ class DialogsList extends React.Component {
         this.state = {
             chats: [],
             authorizationState: ApplicationStore.getAuthorizationState(),
-            connectionState: ApplicationStore.getConnectionState(),
-            firstSliceLoaded: false
+            connectionState: ApplicationStore.getConnectionState()
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (nextState.chats !== this.state.chats) {
-            return true;
-        }
-
-        if (nextState.firstSliceLoaded !== this.state.firstSliceLoaded) {
             return true;
         }
 
@@ -307,8 +302,9 @@ class DialogsList extends React.Component {
 
         await waitSomeTime(this.loadChatContents(result.chat_ids), CONTENTS_PRELOAD_DELAY);
 
-        if (!this.state.firstSliceLoaded) {
-            this.setState({ firstSliceLoaded: true });
+        if (!ApplicationStore.isDialogsReady) {
+            ApplicationStore.setDialogsReady(true);
+            this.forceUpdate();
         }
 
         if (replace) {
@@ -339,8 +335,8 @@ class DialogsList extends React.Component {
     }
 
     render() {
-        const { chats, firstSliceLoaded } = this.state;
-
+        const { chats } = this.state;
+        const { isDialogsReady } = ApplicationStore;
         const dialogs = chats.map(x => <DialogControl key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
 
         /*<Scrollbars*/
@@ -354,11 +350,11 @@ class DialogsList extends React.Component {
 
         return (
             <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>
-                <Fade in={firstSliceLoaded}>
+                <Fade in={isDialogsReady}>
                     <div>{dialogs}</div>
                 </Fade>
 
-                {!firstSliceLoaded && Array.from(Array(10), (_, i) => <DialogControlPlaceholder index={i} key={i} />)}
+                {!isDialogsReady && Array.from(Array(10), (_, i) => <DialogControlPlaceholder index={i} key={i} />)}
             </div>
         );
     }

@@ -7,6 +7,8 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { Fade } from '@material-ui/core';
+import SendIcon from '@material-ui/icons/Send';
 import ChatInfoDialog from '../Dialog/ChatInfoDialog';
 import Footer from './Footer';
 import Header from './Header';
@@ -45,14 +47,20 @@ class DialogDetails extends Component {
     componentDidMount() {
         ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        ApplicationStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
     }
 
     componentWillUnmount() {
         ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+        ApplicationStore.removeListener('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
     }
 
-    onUpdateChatDetailsVisibility = update => {
+    onUpdateChatDetailsVisibility = () => {
+        this.forceUpdate();
+    };
+
+    onClientUpdateDialogsReady = () => {
         this.forceUpdate();
     };
 
@@ -108,14 +116,24 @@ class DialogDetails extends Component {
         this.groups = groups.map(x => {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
+        const { t } = this.props;
         const { chatId, messageId, selectedCount } = this.state;
-        const { isChatDetailsVisible } = ApplicationStore;
+        const { isChatDetailsVisible, isDialogsReady } = ApplicationStore;
 
         return (
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
                 <HeaderPlayer />
                 <Header chatId={chatId} />
                 <MessagesList innerRef={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
+                {!chatId && (
+                    <Fade in={!isDialogsReady}>
+                        <div className='dialog-details-spinner-canvas'>
+                            <div className='dialog-details-spinner dialog-details-spinner-spin'>
+                                <SendIcon color='primary' fontSize='large' />
+                            </div>
+                        </div>
+                    </Fade>
+                )}
                 <Footer chatId={chatId} />
                 <StickerSetDialog />
                 <ChatInfoDialog />

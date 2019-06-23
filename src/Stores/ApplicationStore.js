@@ -25,6 +25,7 @@ class ApplicationStore extends EventEmitter {
         this.profileMediaViewerContent = null;
         this.dragging = false;
         this.actionScheduler = new ActionScheduler(this.handleScheduledAction, this.handleCancelScheduledAction);
+        this.isDialogsReady = false;
 
         this.addTdLibListener();
         this.addStatistics();
@@ -252,6 +253,12 @@ class ApplicationStore extends EventEmitter {
     setProfileMediaViewerContent(content) {
         this.profileMediaViewerContent = content;
         this.emit('clientUpdateProfileMediaViewerContent', content);
+    }
+
+    setDialogsReady(isDialogsReady) {
+        this.isDialogsReady = isDialogsReady;
+
+        this.emit('clientUpdateDialogsReady');
     }
 
     getConnectionState() {
