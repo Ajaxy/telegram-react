@@ -14,6 +14,14 @@ class ApplicationStore extends EventEmitter {
     constructor() {
         super();
 
+        this.reset();
+
+        this.addTdLibListener();
+        this.addStatistics();
+        this.setMaxListeners(Infinity);
+    }
+
+    reset() {
         this.chatId = 0;
         this.dialogChatId = 0;
         this.messageId = null;
@@ -27,10 +35,6 @@ class ApplicationStore extends EventEmitter {
         this.dragging = false;
         this.actionScheduler = new ActionScheduler(this.handleScheduledAction, this.handleCancelScheduledAction);
         this.isDialogsReady = false;
-
-        this.addTdLibListener();
-        this.addStatistics();
-        this.setMaxListeners(Infinity);
     }
 
     addScheduledAction = (key, timeout, action, cancel) => {
@@ -87,6 +91,8 @@ class ApplicationStore extends EventEmitter {
                             const cookies = new Cookies();
                             cookies.remove('lastChatId');
 
+                            this.reset();
+
                             TdLibController.init();
                         }
                         break;
@@ -139,8 +145,6 @@ class ApplicationStore extends EventEmitter {
 
                 break;
             }
-            default:
-                break;
         }
     };
 

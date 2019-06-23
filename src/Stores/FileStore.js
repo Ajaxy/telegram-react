@@ -16,6 +16,13 @@ class FileStore extends EventEmitter {
     constructor() {
         super();
 
+        this.reset();
+
+        this.addTdLibListener();
+        this.setMaxListeners(Infinity);
+    }
+
+    reset() {
         this.callbacks = [];
 
         //this.transactionCount = 0;
@@ -27,9 +34,6 @@ class FileStore extends EventEmitter {
 
         this.downloads = new Map();
         this.uploads = new Map();
-
-        this.addTdLibListener();
-        this.setMaxListeners(Infinity);
     }
 
     onUpdate = async update => {
@@ -85,7 +89,9 @@ class FileStore extends EventEmitter {
         if (!update) return;
         if (!update.authorization_state) return;
 
-        if (update.authorization_state['@type'] === 'authorizationStateWaitTdlibParameters') {
+        if (update.authorization_state['@type'] === 'authorizationStateClosed') {
+            this.reset();
+        } else if (update.authorization_state['@type'] === 'authorizationStateWaitTdlibParameters') {
             await this.initDB();
         }
     };
