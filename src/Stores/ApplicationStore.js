@@ -6,6 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
+import Cookies from 'universal-cookie';
 import TdLibController from '../Controllers/TdLibController';
 import ActionScheduler from '../Utils/ActionScheduler';
 
@@ -83,6 +84,9 @@ class ApplicationStore extends EventEmitter {
                             document.title += ': Zzz…';
                             this.emit('clientUpdateAppInactive');
                         } else {
+                            const cookies = new Cookies();
+                            cookies.remove('lastChatId');
+
                             TdLibController.init();
                         }
                         break;
@@ -150,6 +154,9 @@ class ApplicationStore extends EventEmitter {
                     previousChatId: this.chatId,
                     previousMessageId: this.messageId
                 };
+
+                const cookies = new Cookies();
+                cookies.set('lastChatId', update.chatId);
 
                 this.chatId = update.chatId;
                 this.messageId = update.messageId;

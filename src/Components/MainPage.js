@@ -25,6 +25,7 @@ import UserStore from '../Stores/UserStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
 import '../TelegramApp.css';
+import Cookies from 'universal-cookie';
 
 const styles = theme => ({
     page: {
@@ -61,6 +62,7 @@ class MainPage extends React.Component {
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateForward', this.onClientUpdateForward);
+        ApplicationStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
     }
 
     componentWillUnmount() {
@@ -74,6 +76,7 @@ class MainPage extends React.Component {
             this.onClientUpdateProfileMediaViewerContent
         );
         ApplicationStore.removeListener('clientUpdateForward', this.onClientUpdateForward);
+        ApplicationStore.removeListener('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
     }
 
     onClientUpdateOpenChat = update => {
@@ -108,6 +111,16 @@ class MainPage extends React.Component {
         const { info } = update;
 
         this.setState({ forwardInfo: info });
+    };
+
+    onClientUpdateDialogsReady = () => {
+        const cookies = new Cookies();
+        const chatId = parseInt(cookies.get('lastChatId'));
+        const { isDialogsReady } = ApplicationStore;
+
+        if (isDialogsReady && chatId) {
+            this.handleSelectChat(chatId);
+        }
     };
 
     handleSelectChat = (chatId, messageId = null, popup = false) => {
