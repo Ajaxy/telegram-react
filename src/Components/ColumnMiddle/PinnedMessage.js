@@ -154,6 +154,8 @@ class PinnedMessage extends React.Component {
     handleDelete = event => {
         event.preventDefault();
         event.stopPropagation();
+
+        this.setState({ messageId: null });
     };
 
     render() {
