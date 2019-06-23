@@ -9,6 +9,9 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { Fade } from '@material-ui/core';
 import SendIcon from '@material-ui/icons/Send';
+import { withTranslation } from 'react-i18next';
+import { compose } from 'recompose';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import ChatInfoDialog from '../Dialog/ChatInfoDialog';
 import Footer from './Footer';
 import Header from './Header';
@@ -31,6 +34,9 @@ class DialogDetails extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.t !== this.props.t) {
+            return true;
+        }
         if (nextState.chatId !== this.state.chatId) {
             return true;
         }
@@ -125,7 +131,7 @@ class DialogDetails extends Component {
                 <HeaderPlayer />
                 <Header chatId={chatId} />
                 <MessagesList innerRef={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
-                {!chatId && (
+                {!chatId && <>
                     <Fade in={!isDialogsReady}>
                         <div className='dialog-details-spinner-canvas'>
                             <div className='dialog-details-spinner dialog-details-spinner-spin'>
@@ -133,7 +139,12 @@ class DialogDetails extends Component {
                             </div>
                         </div>
                     </Fade>
-                )}
+                    <Fade in={isDialogsReady}>
+                        <div className='dialog-details-select-chat-tip'>
+                            <div>{t('SelectChatTip')}</div>
+                        </div>
+                    </Fade>
+                </>}
                 <Footer chatId={chatId} />
                 <StickerSetDialog />
                 <ChatInfoDialog />
@@ -142,4 +153,10 @@ class DialogDetails extends Component {
     }
 }
 
-export default DialogDetails;
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(DialogDetails);
